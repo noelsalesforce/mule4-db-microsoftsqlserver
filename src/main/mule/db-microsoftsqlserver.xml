@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="86765656-513b-4b1f-af95-3c2b991d49a1" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="88d296d5-5696-40a9-83ac-4a5f9f3d4995" file="credentials.properties" />
+	<db:config name="Database_Config_Microsoft_SQL_Server" doc:name="Database Config" doc:id="1e10f258-3651-4068-bfab-6a619f2fffc9" >
+		<db:mssql-connection host="${mssql.host}" port="${mssql.port}" user="${mssql.user}" password="${mssql.password}" />
+	</db:config>
+	<flow name="Flow" doc:id="faf685b4-1906-48fe-9311-4020d4f2fca4" >
+		<http:listener doc:name="Listener" doc:id="61d30a8f-7983-44bf-b350-a93660c029af" config-ref="HTTP_Listener_config" path="/test" />
+		<db:select doc:id="56882290-9d1c-4caf-816a-3275fa77a1ca" config-ref="Database_Config_Microsoft_SQL_Server" doc:name="Microsoft SQL Server" >
+			<db:sql ><![CDATA[SELECT CustomerID, FirstName, LastName, Email, Phone, Address, City, Country, CreatedAt
+FROM Customers
+ORDER BY CustomerID;
+]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="4692c40f-b3e5-458d-8617-ecfaf56b4fb1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
